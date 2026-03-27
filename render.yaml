@@ -1,0 +1,11 @@
+services:
+  - type: web
+    name: xcord
+    env: node
+    buildCommand: npm install
+    startCommand: npm start
+    envVars:
+      - key: GH_TOKEN
+        sync: false        # ← you'll paste the value in the Render dashboard
+      - key: NODE_ENV
+        value: production

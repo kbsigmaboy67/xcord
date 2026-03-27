@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Xcord</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Rajdhani:wght@400;500;600;700&family=Orbitron:wght@400;700;900&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+
+<!-- ══ AUTH SCREEN ══════════════════════════════════════════════════════════ -->
+<div id="auth-screen" class="auth-screen">
+  <div class="auth-bg-grid"></div>
+  <div class="auth-scanline"></div>
+
+  <div class="auth-card">
+    <div class="auth-logo">
+      <span class="logo-x">X</span><span class="logo-cord">cord</span>
+      <div class="logo-tagline">// SECURE COMMS PLATFORM</div>
+    </div>
+
+    <div class="auth-tabs">
+      <button class="auth-tab active" id="tab-login" onclick="switchTab('login')">LOGIN</button>
+      <button class="auth-tab" id="tab-register" onclick="switchTab('register')">REGISTER</button>
+    </div>
+
+    <!-- Login -->
+    <div id="form-login" class="auth-form">
+      <div class="field-group">
+        <label class="field-label">USERNAME</label>
+        <input class="field-input" id="login-user" type="text" placeholder="enter username" autocomplete="username" />
+      </div>
+      <div class="field-group">
+        <label class="field-label">PASSWORD</label>
+        <input class="field-input" id="login-pass" type="password" placeholder="••••••••" autocomplete="current-password" />
+      </div>
+      <button class="btn-primary" onclick="doLogin()">
+        <span class="btn-text">CONNECT</span>
+        <span class="btn-arrow">→</span>
+      </button>
+      <div class="auth-error" id="login-error"></div>
+    </div>
+
+    <!-- Register -->
+    <div id="form-register" class="auth-form hidden">
+      <div class="field-group">
+        <label class="field-label">USERNAME</label>
+        <input class="field-input" id="reg-user" type="text" placeholder="letters, numbers, underscores" autocomplete="username" />
+      </div>
+      <div class="field-group">
+        <label class="field-label">DISPLAY NAME</label>
+        <input class="field-input" id="reg-display" type="text" placeholder="how others see you" />
+      </div>
+      <div class="field-group">
+        <label class="field-label">PASSWORD</label>
+        <input class="field-input" id="reg-pass" type="password" placeholder="••••••••" autocomplete="new-password" />
+      </div>
+      <button class="btn-primary" onclick="doRegister()">
+        <span class="btn-text">CREATE ACCOUNT</span>
+        <span class="btn-arrow">→</span>
+      </button>
+      <div class="auth-error" id="reg-error"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ MAIN APP ══════════════════════════════════════════════════════════════ -->
+<div id="app" class="app hidden">
+
+  <!-- Sidebar -->
+  <aside class="sidebar">
+    <div class="sidebar-header">
+      <div class="sidebar-logo">
+        <span class="logo-x">X</span><span class="logo-cord">cord</span>
+      </div>
+    </div>
+
+    <!-- User profile card -->
+    <div class="user-card" id="user-card">
+      <div class="user-avatar-wrap" onclick="openProfile()">
+        <div class="user-avatar" id="sidebar-avatar">?</div>
+        <div class="user-status-dot"></div>
+      </div>
+      <div class="user-info">
+        <div class="user-display" id="sidebar-display">—</div>
+        <div class="user-name" id="sidebar-username">@—</div>
+      </div>
+      <button class="btn-icon" onclick="openProfile()" title="Edit Profile">⚙</button>
+    </div>
+
+    <div class="sidebar-section-label">// XCORD CHANNELS</div>
+
+    <nav class="channel-list" id="channel-list">
+      <!-- filled by JS -->
+    </nav>
+
+    <div class="sidebar-footer">
+      <button class="btn-logout" onclick="doLogout()">DISCONNECT</button>
+    </div>
+  </aside>
+
+  <!-- Main chat area -->
+  <main class="chat-area">
+    <div class="chat-header" id="chat-header">
+      <div class="chat-channel-info">
+        <span class="chat-channel-icon" id="chat-icon">💬</span>
+        <span class="chat-channel-name" id="chat-name">general</span>
+      </div>
+      <div class="chat-status-bar">
+        <span class="status-dot-live"></span>
+        <span class="status-text">LIVE</span>
+      </div>
+    </div>
+
+    <div class="messages" id="messages">
+      <div class="msg-welcome">
+        <div class="msg-welcome-glyph">⬡</div>
+        <div class="msg-welcome-text">Channel initialized. Begin transmission.</div>
+      </div>
+    </div>
+
+    <div class="chat-input-area">
+      <div class="input-row">
+        <div class="input-avatar" id="input-avatar">?</div>
+        <input class="chat-input" id="msg-input"
+               type="text"
+               placeholder="transmit message..."
+               maxlength="2000"
+               onkeydown="if(event.key==='Enter') sendMessage()" />
+        <button class="btn-send" onclick="sendMessage()">
+          <span class="send-icon">⟶</span>
+        </button>
+      </div>
+    </div>
+  </main>
+
+</div>
+
+<!-- ══ PROFILE MODAL ════════════════════════════════════════════════════════ -->
+<div id="profile-modal" class="modal-overlay hidden" onclick="closeProfile(event)">
+  <div class="modal-card">
+    <div class="modal-title">// PROFILE SETTINGS</div>
+
+    <div class="profile-avatar-preview" id="modal-avatar-preview">?</div>
+
+    <div class="field-group">
+      <label class="field-label">DISPLAY NAME</label>
+      <input class="field-input" id="prof-display" type="text" />
+    </div>
+    <div class="field-group">
+      <label class="field-label">AVATAR URL <span style="opacity:.5">(optional)</span></label>
+      <input class="field-input" id="prof-avatar" type="text" placeholder="https://..." oninput="previewAvatar(this.value)" />
+    </div>
+    <div class="field-group">
+      <label class="field-label">CONFIRM PASSWORD</label>
+      <input class="field-input" id="prof-pass" type="password" placeholder="required to save" />
+    </div>
+
+    <div class="modal-actions">
+      <button class="btn-primary" onclick="saveProfile()">SAVE CHANGES</button>
+      <button class="btn-secondary" onclick="closeProfile()">CANCEL</button>
+    </div>
+    <div class="auth-error" id="prof-error"></div>
+  </div>
+</div>
+
+<script src="app.js"></script>
+</body>
+</html>
