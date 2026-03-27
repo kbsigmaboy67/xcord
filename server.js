@@ -86,7 +86,7 @@ app.post("/api/register", async (req, res) => {
   };
 
   const write = await writeFile(USERS_REPO, userPath(slug), userRecord, null, `register:${slug}`);
-  if (!write.ok) return res.status(500).json({ error: "Could not create user" });
+  if (!write.ok) return res.status(500).json({ error: "Could not create user", detail: write.data?.message || write.data });
 
   const { pwHash: _, ...safe } = userRecord;
   res.json({ user: safe });
