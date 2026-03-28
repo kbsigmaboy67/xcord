@@ -34,7 +34,7 @@
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 html, body { height: 100%; background: var(--bg-void); color: var(--text-main); font-family: var(--font-ui); font-size: 15px; line-height: 1.5; overflow: hidden; }
 .hidden { display: none !important; }
-
+  ::selection { color: var(--rgb-orange); background: #000;} 
 /* password mask via CSS */
 .pw-mask { -webkit-text-security: disc; text-security: disc; }
 
