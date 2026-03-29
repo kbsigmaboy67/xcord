@@ -487,3 +487,100 @@ app.get("*", (_, res) => res.sendFile(path.join(__dirname, "public", "index.html
 
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => console.log(`Xcord on :${PORT}`));
+
+// ══════════════════════════════════════════════════════════════════
+//  PRESENCE
+// ══════════════════════════════════════════════════════════════════
+// Each user's presence: _presence/<username>.json in REPO_USERS
+// { username, displayname, avatar, channel, ts, ghost, anon }
+// ghost=true → hidden from all lists (dev only)
+// anon=true  → shows as "Anonymous" (dev only)
+
+const presencePath = (u) => `_presence/${u}.json`;
+const PRESENCE_TTL = 90 * 1000; // 90 seconds
+
+async function readPresence(username) {
+  return getFile(REPO_USERS, presencePath(username));
+}
+
+async function writePresence(username, data) {
+  const existing = await readPresence(username);
+  return putFile(REPO_USERS, presencePath(username), data, existing?.sha || null, `presence:${username}`);
+}
+
+// List all presence files and filter stale ones
+async function getOnlineUsers(channelId) {
+  // List _presence/ directory
+  const r = await ghFetch(`/repos/${REPO_USERS}/contents/_presence`);
+  if (!r.ok || !Array.isArray(r.data)) return { channel: [], global: [] };
+
+  const now = Date.now();
+  const all = [];
+
+  await Promise.all(r.data.map(async (item) => {
+    const f = await getFile(REPO_USERS, item.path);
+    if (!f) return;
+    const p = f.content;
+    if (!p || now - new Date(p.ts).getTime() > PRESENCE_TTL) return;
+    if (p.ghost) return; // ghost users hidden from everyone
+    all.push(p);
+  }));
+
+  const channel = channelId ? all.filter(p => p.channel === channelId) : [];
+  return { channel, global: all };
+}
+
+// Heartbeat — upsert presence
+app.post("/api/presence", async (req, res) => {
+  const { username, password: userPass, channel, ghost, anon } = req.body;
+  if (!username) return res.status(400).json({ error: "Missing username" });
+
+  const f = await authUser(username, userPass);
+  if (!f) return res.status(401).json({ error: "Unauthorized" });
+
+  const devUser = isDev(f.content);
+
+  // Only devs can go ghost or anon
+  const isGhost = devUser && !!ghost;
+  const isAnon  = devUser && !!anon;
+
+  const data = {
+    username: username.toLowerCase(),
+    displayname: isAnon ? "Anonymous" : (f.content.displayname || username),
+    avatar: isAnon ? null : (f.content.avatar || null),
+    channel: channel || null,
+    ts: new Date().toISOString(),
+    ghost: isGhost,
+    anon: isAnon,
+    dev: devUser && !isAnon, // show dev badge unless anon
+  };
+
+  await writePresence(username.toLowerCase(), data);
+  res.json({ ok: true });
+});
+
+// Get online users for a channel (and global count)
+app.get("/api/presence", async (req, res) => {
+  const { channel } = req.query;
+  const { channel: channelUsers, global } = await getOnlineUsers(channel);
+  res.json({
+    channel: channelUsers,
+    globalCount: global.length,
+    global,
+  });
+});
+
+// Clear presence on logout
+app.delete("/api/presence", async (req, res) => {
+  const { username, password: userPass } = req.body;
+  const f = await authUser(username, userPass);
+  if (!f) return res.status(401).json({ error: "Unauthorized" });
+  const existing = await readPresence(username.toLowerCase());
+  if (existing) {
+    await ghFetch(`/repos/${REPO_USERS}/contents/${presencePath(username.toLowerCase())}`, {
+      method: "DELETE",
+      body: JSON.stringify({ message: `presence:logout:${username}`, sha: existing.sha }),
+    });
+  }
+  res.json({ ok: true });
+});
