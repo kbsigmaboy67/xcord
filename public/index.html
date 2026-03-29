@@ -3,14 +3,14 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>🇽cord</title>
+  <title>Xcord</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Rajdhani:wght@400;500;600;700&family=Orbitron:wght@400;700;900&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="styles.css" />
 </head>
 <body>
 
-<!-- AUTH SCREEN -->
+<!-- AUTH -->
 <div id="auth-screen" class="auth-screen">
   <div class="auth-bg-grid"></div>
   <div class="auth-scanline"></div>
@@ -24,37 +24,27 @@
       <button class="auth-tab" id="tab-register" onclick="switchTab('register')">REGISTER</button>
     </div>
     <div id="form-login" class="auth-form">
-      <div class="field-group">
-        <label class="field-label">USERNAME</label>
-        <input class="field-input" id="login-user" type="text" placeholder="enter username" />
-      </div>
-      <div class="field-group">
-        <label class="field-label">PASSWORD</label>
-        <input class="field-input pw-mask" id="login-pass" type="text" placeholder="enter password" autocomplete="off" />
-      </div>
+      <div class="field-group"><label class="field-label">USERNAME</label>
+        <input class="field-input" id="login-user" type="text" placeholder="username" /></div>
+      <div class="field-group"><label class="field-label">PASSWORD</label>
+        <input class="field-input pw-mask" id="login-pass" type="text" placeholder="password" autocomplete="off" /></div>
       <button class="btn-primary" onclick="doLogin()"><span class="btn-text">CONNECT</span><span class="btn-arrow">→</span></button>
       <div class="auth-error" id="login-error"></div>
     </div>
     <div id="form-register" class="auth-form hidden">
-      <div class="field-group">
-        <label class="field-label">USERNAME</label>
-        <input class="field-input" id="reg-user" type="text" placeholder="letters, numbers, underscores" />
-      </div>
-      <div class="field-group">
-        <label class="field-label">DISPLAY NAME</label>
-        <input class="field-input" id="reg-display" type="text" placeholder="how others see you" />
-      </div>
-      <div class="field-group">
-        <label class="field-label">PASSWORD</label>
-        <input class="field-input pw-mask" id="reg-pass" type="text" placeholder="enter password" autocomplete="off" />
-      </div>
+      <div class="field-group"><label class="field-label">USERNAME</label>
+        <input class="field-input" id="reg-user" type="text" placeholder="letters, numbers, underscores" /></div>
+      <div class="field-group"><label class="field-label">DISPLAY NAME</label>
+        <input class="field-input" id="reg-display" type="text" placeholder="how others see you" /></div>
+      <div class="field-group"><label class="field-label">PASSWORD</label>
+        <input class="field-input pw-mask" id="reg-pass" type="text" placeholder="password" autocomplete="off" /></div>
       <button class="btn-primary" onclick="doRegister()"><span class="btn-text">CREATE ACCOUNT</span><span class="btn-arrow">→</span></button>
       <div class="auth-error" id="reg-error"></div>
     </div>
   </div>
 </div>
 
-<!-- MAIN APP -->
+<!-- APP -->
 <div id="app" class="app hidden">
   <aside class="sidebar">
     <div class="sidebar-header">
@@ -69,7 +59,11 @@
         <div class="user-display" id="sidebar-display">—</div>
         <div class="user-name" id="sidebar-username">@—</div>
       </div>
-      <button class="btn-icon" onclick="openProfile()" title="Edit Profile">⚙</button>
+      <div style="display:flex;gap:4px">
+        <button class="btn-icon" onclick="openProfile()" title="Profile">⚙</button>
+        <button class="btn-icon" onclick="openFiles()" title="My Files">🗂</button>
+        <button class="btn-icon dev-only hidden" id="btn-dev-panel" onclick="openDevPanel()" title="Dev Controls">👾</button>
+      </div>
     </div>
     <div class="sidebar-section-label">
       // XCORD CHANNELS
@@ -89,7 +83,7 @@
   </aside>
 
   <main class="chat-area">
-    <div class="chat-header" id="chat-header">
+    <div class="chat-header">
       <div class="chat-channel-info">
         <span class="chat-channel-icon" id="chat-icon">💬</span>
         <span class="chat-channel-name" id="chat-name">general</span>
@@ -97,20 +91,27 @@
       </div>
       <div class="chat-header-actions">
         <div class="chat-status-bar"><span class="status-dot-live"></span><span class="status-text">LIVE</span></div>
+        <button class="btn-header-action hidden" id="btn-export" onclick="exportHistory()" title="Export history">⬇ EXPORT</button>
         <button class="btn-mod hidden" id="btn-mod-panel" onclick="openModPanel()">🛡 MOD</button>
       </div>
     </div>
     <div class="messages" id="messages">
-      <div class="msg-welcome">
-        <div class="msg-welcome-glyph">⬡</div>
-        <div class="msg-welcome-text">Channel initialized. Begin transmission.</div>
-      </div>
+      <div class="msg-welcome"><div class="msg-welcome-glyph">⬡</div><div class="msg-welcome-text">Channel initialized. Begin transmission.</div></div>
     </div>
     <div class="chat-input-area">
+      <!-- Image preview -->
+      <div class="img-preview-row hidden" id="img-preview-row">
+        <img id="img-preview" src="" alt="preview" />
+        <button class="btn-icon" onclick="clearImageAttach()">✕</button>
+      </div>
       <div class="input-row">
         <div class="input-avatar" id="input-avatar">?</div>
+        <label class="btn-attach" title="Attach image">
+          📎
+          <input type="file" id="img-file-input" accept="image/*" style="display:none" onchange="handleImageAttach(this)" />
+        </label>
         <input class="chat-input" id="msg-input" type="text"
-               placeholder="transmit... (@name to mention, @private@name for DM)"
+               placeholder="transmit... (@name mention · @private@name DM)"
                maxlength="2000"
                onkeydown="if(event.key==='Enter'&&!event.shiftKey) sendMessage()"
                oninput="handleInputSuggest(this.value)" />
@@ -127,7 +128,15 @@
     </div>
     <div class="messages dm-messages" id="dm-messages"></div>
     <div class="chat-input-area">
+      <div class="img-preview-row hidden" id="dm-img-preview-row">
+        <img id="dm-img-preview" src="" alt="preview" />
+        <button class="btn-icon" onclick="clearDMImageAttach()">✕</button>
+      </div>
       <div class="input-row">
+        <label class="btn-attach" title="Attach image">
+          📎
+          <input type="file" id="dm-img-file-input" accept="image/*" style="display:none" onchange="handleDMImageAttach(this)" />
+        </label>
         <input class="chat-input" id="dm-input" type="text" placeholder="private message..."
                maxlength="2000" onkeydown="if(event.key==='Enter') sendDM()" />
         <button class="btn-send" onclick="sendDM()"><span class="send-icon">⟶</span></button>
@@ -137,65 +146,45 @@
 </div>
 
 <!-- MODALS -->
+
+<!-- Profile -->
 <div id="profile-modal" class="modal-overlay hidden" onclick="closeModal('profile-modal',event)">
   <div class="modal-card">
     <div class="modal-title">// PROFILE SETTINGS</div>
     <div class="profile-avatar-preview" id="modal-avatar-preview">?</div>
-    <div class="field-group">
-      <label class="field-label">DISPLAY NAME</label>
-      <input class="field-input" id="prof-display" type="text" />
-    </div>
-    <div class="field-group">
-      <label class="field-label">AVATAR URL <span style="opacity:.5">(optional)</span></label>
-      <input class="field-input" id="prof-avatar" type="text" placeholder="https://..." oninput="previewAvatar(this.value)" />
-    </div>
-    <div class="field-group">
-      <label class="field-label">CONFIRM PASSWORD</label>
-      <input class="field-input pw-mask" id="prof-pass" type="text" placeholder="required to save" autocomplete="off" />
-    </div>
+    <div class="field-group"><label class="field-label">DISPLAY NAME</label><input class="field-input" id="prof-display" type="text" /></div>
+    <div class="field-group"><label class="field-label">AVATAR URL</label><input class="field-input" id="prof-avatar" type="text" placeholder="https://..." oninput="previewAvatar(this.value)" /></div>
+    <div class="field-group"><label class="field-label">CONFIRM PASSWORD</label><input class="field-input pw-mask" id="prof-pass" type="text" autocomplete="off" /></div>
     <div class="modal-actions">
-      <button class="btn-primary" onclick="saveProfile()">SAVE CHANGES</button>
+      <button class="btn-primary" onclick="saveProfile()">SAVE</button>
       <button class="btn-secondary" onclick="closeModal('profile-modal')">CANCEL</button>
     </div>
     <div class="auth-error" id="prof-error"></div>
   </div>
 </div>
 
+<!-- Create channel -->
 <div id="create-channel-modal" class="modal-overlay hidden" onclick="closeModal('create-channel-modal',event)">
   <div class="modal-card">
     <div class="modal-title">// CREATE XCORD CHANNEL</div>
-    <div class="field-group">
-      <label class="field-label">CHANNEL NAME</label>
-      <input class="field-input" id="cc-name" type="text" placeholder="lowercase, no spaces" />
-    </div>
-    <div class="field-group">
-      <label class="field-label">ICON (emoji)</label>
-      <input class="field-input" id="cc-icon" type="text" placeholder="📡" maxlength="2" />
-    </div>
-    <div class="field-group">
-      <label class="field-label">CHANNEL PASSWORD <span style="opacity:.5">(optional)</span></label>
-      <input class="field-input pw-mask" id="cc-password" type="text" placeholder="leave blank for open" autocomplete="off" />
-    </div>
-    <div class="field-group">
-      <label class="field-label">YOUR PASSWORD</label>
-      <input class="field-input pw-mask" id="cc-userpass" type="text" placeholder="confirm identity" autocomplete="off" />
-    </div>
+    <div class="field-group"><label class="field-label">CHANNEL NAME</label><input class="field-input" id="cc-name" type="text" placeholder="lowercase-name" /></div>
+    <div class="field-group"><label class="field-label">ICON (emoji)</label><input class="field-input" id="cc-icon" type="text" placeholder="📡" maxlength="2" /></div>
+    <div class="field-group"><label class="field-label">CHANNEL PASSWORD (optional)</label><input class="field-input pw-mask" id="cc-password" type="text" autocomplete="off" /></div>
+    <div class="field-group"><label class="field-label">YOUR PASSWORD</label><input class="field-input pw-mask" id="cc-userpass" type="text" autocomplete="off" /></div>
     <div class="modal-actions">
-      <button class="btn-primary" onclick="createChannel()">CREATE CHANNEL</button>
+      <button class="btn-primary" onclick="createChannel()">CREATE</button>
       <button class="btn-secondary" onclick="closeModal('create-channel-modal')">CANCEL</button>
     </div>
     <div class="auth-error" id="cc-error"></div>
   </div>
 </div>
 
+<!-- Channel password -->
 <div id="channel-pass-modal" class="modal-overlay hidden" onclick="closeModal('channel-pass-modal',event)">
   <div class="modal-card">
     <div class="modal-title">// CHANNEL LOCKED 🔒</div>
-    <p style="font-family:var(--font-mono);font-size:.8rem;color:var(--text-dim);margin-bottom:12px;">Enter channel password to continue.</p>
-    <div class="field-group">
-      <input class="field-input pw-mask" id="chan-pass-input" type="text" placeholder="channel password" autocomplete="off"
-             onkeydown="if(event.key==='Enter') submitChannelPass()" />
-    </div>
+    <div class="field-group"><input class="field-input pw-mask" id="chan-pass-input" type="text" placeholder="channel password" autocomplete="off"
+           onkeydown="if(event.key==='Enter') submitChannelPass()" /></div>
     <div class="modal-actions">
       <button class="btn-primary" onclick="submitChannelPass()">UNLOCK</button>
       <button class="btn-secondary" onclick="closeModal('channel-pass-modal')">CANCEL</button>
@@ -204,12 +193,11 @@
   </div>
 </div>
 
+<!-- Edit message -->
 <div id="edit-msg-modal" class="modal-overlay hidden" onclick="closeModal('edit-msg-modal',event)">
   <div class="modal-card">
     <div class="modal-title">// EDIT MESSAGE</div>
-    <div class="field-group">
-      <textarea class="field-input field-textarea" id="edit-msg-content" rows="3"></textarea>
-    </div>
+    <div class="field-group"><textarea class="field-input field-textarea" id="edit-msg-content" rows="3"></textarea></div>
     <div class="modal-actions">
       <button class="btn-primary" onclick="submitEditMsg()">SAVE</button>
       <button class="btn-secondary" onclick="closeModal('edit-msg-modal')">CANCEL</button>
@@ -218,28 +206,26 @@
   </div>
 </div>
 
+<!-- Mod panel -->
 <div id="mod-panel-modal" class="modal-overlay hidden" onclick="closeModal('mod-panel-modal',event)">
   <div class="modal-card mod-card">
     <div class="modal-title">// MOD PANEL — <span id="mod-channel-name"></span></div>
-
     <div class="mod-section">
       <div class="mod-section-title">CHANNEL PASSWORD</div>
       <div class="mod-row">
-        <input class="field-input pw-mask" id="mod-chan-pass" type="text" placeholder="new password (blank = none)" style="flex:1" autocomplete="off" />
+        <input class="field-input pw-mask" id="mod-chan-pass" type="text" placeholder="new password" style="flex:1" autocomplete="off" />
         <button class="btn-mod-action" onclick="modSetPassword()">SET</button>
         <button class="btn-mod-action btn-danger" onclick="modClearPassword()">CLEAR</button>
       </div>
     </div>
-
     <div class="mod-section">
-      <div class="mod-section-title">ALLOWLIST <span style="opacity:.5;font-size:.7rem">(usernames, comma-sep; blank = open to all)</span></div>
+      <div class="mod-section-title">ALLOWLIST (comma-sep usernames, blank = open)</div>
       <div class="mod-row">
-        <input class="field-input" id="mod-allowlist" type="text" placeholder="alice, bob, charlie" style="flex:1" />
+        <input class="field-input" id="mod-allowlist" type="text" placeholder="alice, bob" style="flex:1" />
         <button class="btn-mod-action" onclick="modSetAllowlist()">SET</button>
         <button class="btn-mod-action btn-danger" onclick="modClearAllowlist()">CLEAR</button>
       </div>
     </div>
-
     <div class="mod-section">
       <div class="mod-section-title">WORD FILTERS</div>
       <div id="mod-filters-list" class="mod-filters-list"></div>
@@ -250,35 +236,79 @@
         <button class="btn-mod-action" onclick="modAddFilter()">ADD</button>
       </div>
     </div>
-
     <div class="mod-section">
-      <div class="mod-section-title">BAN / UNBAN USER</div>
+      <div class="mod-section-title">BAN / UNBAN</div>
       <div class="mod-row">
         <input class="field-input" id="mod-ban-user" type="text" placeholder="username" style="flex:1" />
         <select class="field-input" id="mod-ban-duration" style="width:auto;flex:0 0 auto">
-          <option value="10">10 min</option>
-          <option value="60">1 hour</option>
-          <option value="1440">24 hours</option>
-          <option value="10080">7 days</option>
+          <option value="10">10 min</option><option value="60">1 hour</option>
+          <option value="1440">24 hours</option><option value="10080">7 days</option>
           <option value="permanent">Permanent</option>
         </select>
         <button class="btn-mod-action btn-danger" onclick="modBanUser()">BAN</button>
         <button class="btn-mod-action" onclick="modUnbanUser()">UNBAN</button>
       </div>
     </div>
-
     <div class="field-group">
-      <label class="field-label">YOUR PASSWORD (required for all actions)</label>
-      <input class="field-input pw-mask" id="mod-userpass" type="text" placeholder="••••••••" autocomplete="off" />
+      <label class="field-label">YOUR PASSWORD</label>
+      <input class="field-input pw-mask" id="mod-userpass" type="text" autocomplete="off" />
     </div>
     <div class="auth-error" id="mod-error"></div>
-
-    <div class="mod-section" style="margin-top:8px">
+    <div class="mod-section" style="margin-top:4px">
       <div class="mod-section-title danger-zone">DANGER ZONE</div>
-      <button class="btn-delete-channel" onclick="modDeleteChannel()">⚠ DELETE THIS CHANNEL</button>
+      <button class="btn-delete-channel" onclick="modDeleteChannel()">⚠ DELETE CHANNEL</button>
     </div>
+    <button class="btn-secondary" style="width:100%;margin-top:10px" onclick="closeModal('mod-panel-modal')">CLOSE</button>
+  </div>
+</div>
 
-    <button class="btn-secondary" style="width:100%;margin-top:12px" onclick="closeModal('mod-panel-modal')">CLOSE PANEL</button>
+<!-- File storage -->
+<div id="files-modal" class="modal-overlay hidden" onclick="closeModal('files-modal',event)">
+  <div class="modal-card" style="width:500px">
+    <div class="modal-title">// FILE STORAGE</div>
+    <div class="file-upload-row">
+      <label class="btn-primary" style="cursor:pointer;margin:0;justify-content:center">
+        <span>⬆ UPLOAD FILE</span>
+        <input type="file" id="file-upload-input" style="display:none" onchange="uploadFile(this)" />
+      </label>
+    </div>
+    <div id="files-list" class="files-list"><div class="loading-msg">// loading files...</div></div>
+    <button class="btn-secondary" style="width:100%;margin-top:8px" onclick="closeModal('files-modal')">CLOSE</button>
+  </div>
+</div>
+
+<!-- Dev panel -->
+<div id="dev-panel-modal" class="modal-overlay hidden" onclick="closeModal('dev-panel-modal',event)">
+  <div class="modal-card" style="width:500px">
+    <div class="modal-title" style="color:var(--rgb-green);text-shadow:var(--glow-green)">// 👾 DEV CONTROLS</div>
+    <div class="mod-section">
+      <div class="mod-section-title">MANAGE DEV ACCESS</div>
+      <div class="mod-row">
+        <input class="field-input" id="dev-target-user" type="text" placeholder="target username" style="flex:1" />
+        <button class="btn-mod-action" style="border-color:var(--rgb-green);color:var(--rgb-green)" onclick="devGrant()">GRANT DEV</button>
+        <button class="btn-mod-action btn-danger" onclick="devRevoke()">REVOKE</button>
+      </div>
+      <div class="mod-row" style="margin-top:6px">
+        <button class="btn-mod-action" style="flex:1" onclick="devCheckStatus()">CHECK STATUS</button>
+      </div>
+      <div class="auth-error" id="dev-status-msg" style="text-align:left;margin-top:6px"></div>
+    </div>
+    <div class="mod-section">
+      <div class="mod-section-title">IMPORT CHANNEL HISTORY</div>
+      <div class="mod-row">
+        <input class="field-input" id="dev-import-channel" type="text" placeholder="channel ID" style="flex:1" />
+        <label class="btn-mod-action" style="cursor:pointer">
+          IMPORT JSON
+          <input type="file" id="dev-import-file" accept=".json" style="display:none" onchange="devImport(this)" />
+        </label>
+      </div>
+    </div>
+    <div class="field-group">
+      <label class="field-label">YOUR PASSWORD</label>
+      <input class="field-input pw-mask" id="dev-userpass" type="text" autocomplete="off" />
+    </div>
+    <div class="auth-error" id="dev-error"></div>
+    <button class="btn-secondary" style="width:100%;margin-top:10px" onclick="closeModal('dev-panel-modal')">CLOSE</button>
   </div>
 </div>
 
