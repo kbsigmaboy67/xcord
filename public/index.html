@@ -91,9 +91,18 @@
       </div>
       <div class="chat-header-actions">
         <div class="chat-status-bar"><span class="status-dot-live"></span><span class="status-text">LIVE</span></div>
+        <button class="btn-header-action" id="btn-online-toggle" onclick="toggleOnlinePanel()" title="Show online users">👥 ONLINE</button>
         <button class="btn-header-action hidden" id="btn-export" onclick="exportHistory()" title="Export history">⬇ EXPORT</button>
         <button class="btn-mod hidden" id="btn-mod-panel" onclick="openModPanel()">🛡 MOD</button>
       </div>
+    </div>
+    <div class="chan-pass-check-row hidden" id="chan-pass-check-row">
+      <span class="chan-pass-check-label">🔒 VERIFY PASSWORD:</span>
+      <input class="field-input pw-mask" id="chan-pass-check-input" type="text"
+             style="padding:5px 10px;font-size:.8rem" placeholder="enter channel password"
+             autocomplete="off" onkeydown="if(event.key==='Enter') checkChannelPassword()" />
+      <button class="btn-mod-action" onclick="checkChannelPassword()">CHECK</button>
+      <div class="auth-error" id="chan-pass-check-result" style="margin:0;min-height:0"></div>
     </div>
     <div class="messages" id="messages">
       <div class="msg-welcome"><div class="msg-welcome-glyph">⬡</div><div class="msg-welcome-text">Channel initialized. Begin transmission.</div></div>
@@ -120,6 +129,23 @@
       <div class="mention-suggest hidden" id="mention-suggest"></div>
     </div>
   </main>
+
+
+  <!-- Online users panel -->
+  <aside class="online-panel" id="online-panel">
+    <div class="online-panel-header">
+      <span class="online-panel-title">// ONLINE</span>
+      <button class="btn-icon" onclick="toggleOnlinePanel()" title="Close">✕</button>
+    </div>
+    <div class="online-section-label">IN THIS CHANNEL</div>
+    <div class="online-list" id="channel-online-list">
+      <div class="loading-msg" style="font-size:.7rem;padding:10px">...</div>
+    </div>
+    <div class="online-section-label">GLOBAL <span id="global-online-count" class="online-count-badge">0</span></div>
+    <div class="online-list" id="global-online-list">
+      <div class="loading-msg" style="font-size:.7rem;padding:10px">...</div>
+    </div>
+  </aside>
 
   <aside class="dm-panel hidden" id="dm-panel">
     <div class="dm-panel-header">
@@ -281,6 +307,14 @@
 <div id="dev-panel-modal" class="modal-overlay hidden" onclick="closeModal('dev-panel-modal',event)">
   <div class="modal-card" style="width:500px">
     <div class="modal-title" style="color:var(--rgb-green);text-shadow:var(--glow-green)">// 👾 DEV CONTROLS</div>
+    <div class="mod-section" style="border-color:rgba(57,255,20,.2)">
+      <div class="mod-section-title" style="color:var(--rgb-green)">PRESENCE MODE</div>
+      <div class="mod-row" style="gap:8px;flex-wrap:wrap">
+        <button class="btn-mod-action" id="btn-ghost-toggle" onclick="toggleGhost()" style="flex:1">👻 GHOST: OFF</button>
+        <button class="btn-mod-action" id="btn-anon-toggle" onclick="toggleAnon()" style="flex:1">🎭 ANON: OFF</button>
+      </div>
+      <div style="font-family:var(--font-mono);font-size:.62rem;color:var(--text-dim);margin-top:4px">Ghost = invisible to all. Anon = shows as Anonymous.</div>
+    </div>
     <div class="mod-section">
       <div class="mod-section-title">MANAGE DEV ACCESS</div>
       <div class="mod-row">
@@ -309,6 +343,18 @@
     </div>
     <div class="auth-error" id="dev-error"></div>
     <button class="btn-secondary" style="width:100%;margin-top:10px" onclick="closeModal('dev-panel-modal')">CLOSE</button>
+  </div>
+</div>
+
+
+<!-- Global online modal -->
+<div id="global-online-modal" class="modal-overlay hidden" onclick="closeModal('global-online-modal',event)">
+  <div class="modal-card" style="width:420px">
+    <div class="modal-title">// XCORD — WHO'S ONLINE</div>
+    <div id="global-online-modal-list" class="online-list" style="max-height:400px;overflow-y:auto">
+      <div class="loading-msg">loading...</div>
+    </div>
+    <button class="btn-secondary" style="width:100%;margin-top:10px" onclick="closeModal('global-online-modal')">CLOSE</button>
   </div>
 </div>
 
